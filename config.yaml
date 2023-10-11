@@ -1,0 +1,1 @@
+RABBITMQ_URL: amqp://rok:rokjecar@localhost:5672/
