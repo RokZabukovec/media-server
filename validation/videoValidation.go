@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"io"
 	"mime/multipart"
 	"net/http"
 )
@@ -20,9 +21,19 @@ func GetAcceptedMIMITypes() []string {
 
 func IsVideo(file *multipart.File) bool {
 	isVideo := false
+
+	// Store the current position of the file
+	currentPosition, _ := (*file).Seek(0, io.SeekCurrent)
+
 	mimeType, err := GetFileMimeType(*file)
 	if err != nil {
-		isVideo = false
+		return false // directly return false if there's an error
+	}
+
+	// Reset the file's position back to where it was
+	_, err = (*file).Seek(currentPosition, io.SeekStart)
+	if err != nil {
+		return false // handle error in seeking back, though this shouldn't generally happen
 	}
 
 	var AcceptedMIME = []string{VideoMP4, VideoMPEG, VideoQuicktime, VideoMSVideo, VideoFLV, VideoWebM}

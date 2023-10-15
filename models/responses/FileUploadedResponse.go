@@ -7,13 +7,12 @@ import (
 )
 
 type FileUploadedResponse struct {
-	Message       string
-	ContentLength int64
-	Filename      string
+	Message  string
+	Filename string
 }
 
-func NewFileUploadedResponse(w http.ResponseWriter, message string, contentLength int64, filename string) {
-	fileUploadedResponse := &FileUploadedResponse{Message: message, ContentLength: contentLength, Filename: filename}
+func NewFileUploadedResponse(w http.ResponseWriter, message string, filename string) {
+	fileUploadedResponse := &FileUploadedResponse{Message: message, Filename: filename}
 	response, err := json.Marshal(fileUploadedResponse)
 
 	if err != nil {

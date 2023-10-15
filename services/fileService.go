@@ -51,11 +51,9 @@ func GetFolders(path string) []DirInfo {
 
 func GetMediaServerBaseDirectory() (string, error) {
 	homeDir, err := os.UserHomeDir()
-
 	if err != nil {
 		return "", err
 	}
-
 	directoryName := "MediaServer"
 
 	return filepath.Join(homeDir, directoryName), nil
@@ -70,7 +68,7 @@ func RemoveExtension(fileName string) string {
 }
 
 func CreateNewSegmentFile(segmentsFolderPath, segmentPrefix string, segmentIndex int) (*os.File, error) {
-	segmentFileName := fmt.Sprintf("%s-%04d.ts", strings.TrimSuffix(segmentPrefix, filepath.Ext(segmentPrefix)), segmentIndex)
+	segmentFileName := fmt.Sprintf("%s%d.ts", strings.TrimSuffix(segmentPrefix, filepath.Ext(segmentPrefix)), segmentIndex)
 	segmentFilePath := filepath.Join(segmentsFolderPath, segmentFileName)
 
 	return os.Create(segmentFilePath)
