@@ -4,19 +4,12 @@ import (
 	"fmt"
 	"github.com/charmbracelet/log"
 	"io"
+	"mediaserver/configuration"
 	"mime/multipart"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
-)
-
-const (
-	SegmentSize   = 1024 * 1024 * 1 // 5MB segment size
-	BufferSize    = 1024            // 1MB buffer size
-	SegmentName   = "segment"       // the name of the segment prefix
-	PlaylistName  = "manifest.m3u8"
-	ThumbnailName = "thumbnail.jpg" // the name of the playlist file
 )
 
 func CreateHLSFilesFromAPIRequest(file multipart.File, outputFolderPath, outputFilename string) error {
@@ -49,7 +42,7 @@ func CreateHLSFilesFromAPIRequest(file multipart.File, outputFolderPath, outputF
 	}
 
 	// Create the HLS playlist from the video
-	hlsOutputPath := filepath.Join(outputFolderPath, PlaylistName)
+	hlsOutputPath := filepath.Join(outputFolderPath, configuration.PlaylistName)
 	ffmpegCmd := exec.Command(
 		"ffmpeg",
 		"-i", outputPath,
@@ -68,8 +61,10 @@ func CreateHLSFilesFromAPIRequest(file multipart.File, outputFolderPath, outputF
 		return err
 	}
 
-	thumbnailOutputPath := filepath.Join(outputFolderPath, ThumbnailName)
+	thumbnailOutputPath := filepath.Join(outputFolderPath, configuration.ThumbnailName)
 
+	// TODO Add check if the video is less than 5s long.
+	// Take the frame in the middle
 	if _, err := os.Stat(thumbnailOutputPath); os.IsNotExist(err) {
 		thumbnailCmd := exec.Command(
 			"ffmpeg",
@@ -98,9 +93,9 @@ func CreateSegmentedFiles(folderName string, file multipart.File) (int64, error)
 		log.Error("Failed to create media folder")
 	}
 
-	buffer := make([]byte, BufferSize)
+	buffer := make([]byte, configuration.BufferSize)
 	segmentIndex := 0
-	segmentFile, err := CreateNewSegmentFile(segmentsFolderPath, SegmentName, segmentIndex)
+	segmentFile, err := CreateNewSegmentFile(segmentsFolderPath, configuration.SegmentName, segmentIndex)
 	defer func(segmentFile *os.File) {
 		err := segmentFile.Close()
 		if err != nil {
@@ -124,10 +119,10 @@ func CreateSegmentedFiles(folderName string, file multipart.File) (int64, error)
 		nbBytes += int64(n)
 		totalBytes += int64(n)
 
-		if nbBytes >= int64(SegmentSize) {
+		if nbBytes >= int64(configuration.SegmentSize) {
 			segmentIndex++
 			segmentFile.Close()
-			segmentFile, err = CreateNewSegmentFile(segmentsFolderPath, SegmentName, segmentIndex)
+			segmentFile, err = CreateNewSegmentFile(segmentsFolderPath, configuration.SegmentName, segmentIndex)
 
 			if err != nil {
 				return nbBytes, err

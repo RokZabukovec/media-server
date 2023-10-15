@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
+	"io"
+	"mediaserver/configuration"
 	"mediaserver/models/responses"
 	"mediaserver/services"
 	"mediaserver/validation"
@@ -13,9 +15,34 @@ import (
 	"path"
 )
 
-const (
-	MaxFileSize = 1 << 30 // 1 gigabyte (GB) in bytes
-)
+func GetThumbnail(w http.ResponseWriter, r *http.Request) {
+	folderName := chi.URLParam(r, "folder")
+	thumbnailPath, err := services.GetThumbnailFilepath(folderName)
+
+	if err != nil || len(thumbnailPath) <= 0 {
+		http.NotFound(w, r)
+
+		return
+	}
+
+	file, err := os.Open(thumbnailPath)
+	if err != nil {
+		http.Error(w, "Error opening thumbnail", http.StatusInternalServerError)
+		return
+	}
+
+	defer file.Close()
+
+	w.Header().Set("Content-Type", "image/jpeg")
+	// Cache for 30 days
+	w.Header().Set("Cache-Control", "max-age=2592000")
+
+	_, err = io.Copy(w, file)
+	if err != nil {
+		http.Error(w, "Error sending thumbnail", http.StatusInternalServerError)
+		return
+	}
+}
 
 func Stream(w http.ResponseWriter, r *http.Request) {
 	folderName := chi.URLParam(r, "folder")
@@ -38,6 +65,7 @@ func Stream(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Error reading segment file: %v", err), http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusPartialContent)
 	w.Write(segmentContent)
 }
@@ -47,8 +75,7 @@ func Playlist(w http.ResponseWriter, r *http.Request) {
 
 	baseDir, _ := services.GetMediaServerBaseDirectory()
 	manifestDir := path.Join(baseDir, folderName)
-	manifestFile := "manifest.m3u8"
-	manifestPath := path.Join(manifestDir, manifestFile)
+	manifestPath := path.Join(manifestDir, configuration.PlaylistName)
 
 	manifestContent, err := os.ReadFile(manifestPath)
 	if err != nil {
@@ -59,15 +86,12 @@ func Playlist(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/vnd.apple.mpegurl")
 	w.WriteHeader(http.StatusPartialContent)
-
 	w.Write(manifestContent)
 }
 
 func GetFiles(w http.ResponseWriter) {
 	dirPath, _ := services.GetMediaServerBaseDirectory()
-
 	files := services.GetFolders(dirPath)
-
 	jsonString, err := json.Marshal(files)
 
 	if err != nil {
@@ -86,7 +110,7 @@ func GetFiles(w http.ResponseWriter) {
 }
 
 func UploadFile(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(MaxFileSize)
+	err := r.ParseMultipartForm(configuration.MaxFileSize)
 	if err != nil {
 		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
 		return

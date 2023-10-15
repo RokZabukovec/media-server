@@ -1,52 +1,93 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"github.com/charmbracelet/log"
+	"mediaserver/configuration"
+	"mediaserver/models"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
-type DirInfo struct {
-	Name    string
-	Size    int64
-	Mode    os.FileMode
-	ModTime time.Time
-	IsDir   bool
-}
-
-func GetFolders(path string) []DirInfo {
-	var filesInDir []DirInfo
+func GetFolders(path string) []models.DirInfo {
+	var filesInDir []models.DirInfo
 
 	files, err := os.ReadDir(path)
 	if err != nil {
 		log.Fatalf("Failed to read directory: %v", err)
 	}
 
-	for _, file := range files {
-		if file.IsDir() {
-			info, err := file.Info()
+	for _, folder := range files {
+		if folder.IsDir() {
+			info, err := folder.Info()
 
 			if err != nil {
-				log.Errorf("Could not get file info for %s", file.Name())
+				log.Errorf("Could not get folder info for %s", folder.Name())
 				continue
 			}
 
-			dirInfo := DirInfo{
-				Name:    info.Name(),
-				Size:    info.Size(),
-				Mode:    info.Mode(),
-				ModTime: info.ModTime(),
-				IsDir:   info.IsDir(),
-			}
+			playlist, _ := GetMediaUrl(info.Name())
+			thumbnail, _ := GetThumbnailUrl(info.Name())
 
-			filesInDir = append(filesInDir, dirInfo)
+			dirInfo := models.NewDirInfo(info.Name(), info.Size(), thumbnail, playlist)
+			filesInDir = append(filesInDir, *dirInfo)
 		}
 	}
 
 	return filesInDir
+}
+
+func GetThumbnailFilepath(mediaDir string) (string, error) {
+	base, err := GetMediaServerBaseDirectory()
+	if err != nil {
+		return "", err
+	}
+
+	thumbnailPath := path.Join(base, mediaDir, configuration.ThumbnailName)
+	if _, err := os.Stat(thumbnailPath); os.IsNotExist(err) {
+		return "", errors.New("thumbnail file does not exist")
+	}
+
+	return thumbnailPath, nil
+}
+
+func GetThumbnailUrl(mediaDir string) (string, error) {
+	base, err := GetMediaServerBaseDirectory()
+	if err != nil {
+		return "", err
+	}
+
+	thumbnailPath := path.Join(base, mediaDir, configuration.ThumbnailName)
+	if _, err := os.Stat(thumbnailPath); os.IsNotExist(err) {
+		return "", errors.New("thumbnail file does not exist")
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("/thumbnail/%s", mediaDir), nil
+}
+
+func GetMediaUrl(mediaDir string) (string, error) {
+	base, err := GetMediaServerBaseDirectory()
+	if err != nil {
+		return "", err
+	}
+
+	thumbnailPath := path.Join(base, mediaDir, configuration.PlaylistName)
+	if _, err := os.Stat(thumbnailPath); os.IsNotExist(err) {
+		return "", errors.New("playlist file does not exist")
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("/stream/%s/%s", mediaDir, configuration.PlaylistName), nil
 }
 
 func GetMediaServerBaseDirectory() (string, error) {
