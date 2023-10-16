@@ -46,12 +46,13 @@ func CreateHLSFilesFromAPIRequest(file multipart.File, outputFolderPath, outputF
 	ffmpegCmd := exec.Command(
 		"ffmpeg",
 		"-i", outputPath,
-		"-profile:v", "high",
+		"-profile:v", "baseline",
 		"-level", "3.0",
 		"-start_number", "0",
 		"-hls_time", "10",
 		"-hls_list_size", "0",
 		"-f", "hls",
+		"-preset", "ultrafast", // Add this line
 		hlsOutputPath,
 	)
 
