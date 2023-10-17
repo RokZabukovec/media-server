@@ -52,7 +52,7 @@ func CreateHLSFilesFromAPIRequest(file multipart.File, outputFolderPath, outputF
 		"-hls_time", "10",
 		"-hls_list_size", "0",
 		"-f", "hls",
-		"-preset", "ultrafast", // Add this line
+		"-preset", "ultrafast",
 		hlsOutputPath,
 	)
 
