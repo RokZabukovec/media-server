@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/log"
 	"mediaserver/configuration"
 	"mediaserver/models"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -69,7 +70,9 @@ func GetThumbnailUrl(mediaDir string) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("/thumbnail/%s", mediaDir), nil
+	urlEncoded := url.QueryEscape(mediaDir)
+
+	return fmt.Sprintf("/api/thumbnail/%s", urlEncoded), nil
 }
 
 func GetMediaUrl(mediaDir string) (string, error) {
@@ -87,7 +90,14 @@ func GetMediaUrl(mediaDir string) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("/stream/%s/%s", mediaDir, configuration.PlaylistName), nil
+	return fmt.Sprintf("/api/stream/%s/%s", mediaDir, configuration.PlaylistName), nil
+}
+
+func GetDatabaseFilepath(dbName string) (string, error) {
+	homeDir, _ := GetMediaServerBaseDirectory()
+	dbFileName := fmt.Sprintf("%s.db", dbName)
+
+	return filepath.Join(homeDir, dbFileName), nil
 }
 
 func GetMediaServerBaseDirectory() (string, error) {
@@ -95,6 +105,7 @@ func GetMediaServerBaseDirectory() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	directoryName := "MediaServer"
 
 	return filepath.Join(homeDir, directoryName), nil

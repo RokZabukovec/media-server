@@ -11,12 +11,15 @@ import (
 	"mediaserver/services"
 	"mediaserver/validation"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 )
 
 func GetThumbnail(w http.ResponseWriter, r *http.Request) {
-	folderName := chi.URLParam(r, "folder")
+	encodedFolder := chi.URLParam(r, "folder")
+	folderName, _ := url.QueryUnescape(encodedFolder)
+
 	thumbnailPath, err := services.GetThumbnailFilepath(folderName)
 
 	if err != nil || len(thumbnailPath) <= 0 {

@@ -26,7 +26,7 @@ func (s *BroadcastService) Broadcast() {
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGTERM)
 
 	info := []string{"Media Server"}
-	service, err := mdns.NewMDNSService("Media Server", "_http._tcp.", "", "", 8080, nil, info)
+	service, err := mdns.NewMDNSService("hub", "_http._tcp.", "local.", "", s.port, nil, info)
 
 	log.Info("Started service instance Media Server of type _http._tcp on port 8080")
 	if err != nil {

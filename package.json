@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "daisyui": "^4.4.20"
+  },
+  "dependencies": {
+    "@videojs-player/vue": "^1.0.0",
+    "axios": "^1.6.2",
+    "video.js": "^8.6.1"
+  }
+}
