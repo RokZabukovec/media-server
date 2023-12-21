@@ -28,7 +28,7 @@ func (s *BroadcastService) Broadcast() {
 	info := []string{"Media Server"}
 	service, err := mdns.NewMDNSService("hub", "_http._tcp.", "local.", "", s.port, nil, info)
 
-	log.Info("Started service instance Media Server of type _http._tcp on port 8080")
+	log.Info("Started server")
 	if err != nil {
 		log.Fatalf("Failed to create mDNS service: %v", err)
 	}
@@ -39,7 +39,7 @@ func (s *BroadcastService) Broadcast() {
 		log.Fatalf("Failed to create mDNS server: %v", err)
 	}
 
-	log.Info("Service broadcasting started")
+	log.Info("Service broadcasting started 🛜")
 
 	<-terminationChan
 
@@ -47,7 +47,7 @@ func (s *BroadcastService) Broadcast() {
 
 	server.Shutdown()
 
-	log.Info("Service broadcasting stopped")
+	log.Info("Service broadcasting stopped ❌")
 
 	os.Exit(0)
 }

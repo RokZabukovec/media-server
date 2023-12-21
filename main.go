@@ -13,7 +13,7 @@ func main() {
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGTERM)
 
 	migrations.Migrate(configuration.AppName)
-	app := NewApplication(8888, configuration.AppName)
+	app := NewApplication(configuration.Port, configuration.AppName)
 
 	app.Run()
 }

@@ -27,10 +27,10 @@ func GetDatabase(dbName string) *gorm.DB {
 		dbFilepath, _ := services.GetDatabaseFilepath(dbName)
 		db, err = gorm.Open(sqlite.Open(dbFilepath), &gorm.Config{})
 		if err == nil {
-			log.Printf("Connected to the database in %d try 💥", i)
+			log.Info("Connected to the database 💥", "retry", i)
 			return db
 		}
-		log.Printf("Failed to connect to database: %v", err)
+		log.Error("Failed to connect to database", "error", err)
 		time.Sleep(1 * time.Second)
 	}
 

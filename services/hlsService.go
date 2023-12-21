@@ -15,12 +15,11 @@ import (
 func CreateHLSFilesFromAPIRequest(file multipart.File, outputFolderPath, outputFilename string) error {
 	if _, err := os.Stat(outputFolderPath); os.IsNotExist(err) {
 		if err = os.MkdirAll(outputFolderPath, os.ModePerm); err != nil {
-			log.Errorf("failed to create output directory: %w", err)
+			log.Errorf("Failed to create output directory: %w", err)
 			return err
 		}
 	}
 
-	// Create or overwrite the output video file
 	outputPath := filepath.Join(outputFolderPath, outputFilename)
 	outputFile, err := os.Create(outputPath)
 	if err != nil {

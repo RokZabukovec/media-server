@@ -25,5 +25,6 @@ func (c *MediaRouter) configureApiRoutes(r *chi.Mux) {
 	r.Get("/api/files", func(w http.ResponseWriter, r *http.Request) { controllers.GetFiles(w) })
 	r.Post("/api/files", func(w http.ResponseWriter, r *http.Request) { controllers.UploadFile(w, r) })
 
+	r.Get("/api/category", func(w http.ResponseWriter, r *http.Request) { controllers.GetAllCategories(w, r) })
 	r.Post("/api/category", func(w http.ResponseWriter, r *http.Request) { controllers.CreateCategory(w, r) })
 }
