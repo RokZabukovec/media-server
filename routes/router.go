@@ -25,6 +25,13 @@ func (c *MediaRouter) configureApiRoutes(r *chi.Mux) {
 	r.Get("/api/files", func(w http.ResponseWriter, r *http.Request) { controllers.GetFiles(w) })
 	r.Post("/api/files", func(w http.ResponseWriter, r *http.Request) { controllers.UploadFile(w, r) })
 
-	r.Get("/api/category", func(w http.ResponseWriter, r *http.Request) { controllers.GetAllCategories(w, r) })
-	r.Post("/api/category", func(w http.ResponseWriter, r *http.Request) { controllers.CreateCategory(w, r) })
+	r.Get("/api/video", func(w http.ResponseWriter, r *http.Request) { controllers.GetVideo(w, r) })
+	r.Get("/api/videos", func(w http.ResponseWriter, r *http.Request) { controllers.GetVideo(w, r) })
+	r.Post("/api/video", func(w http.ResponseWriter, r *http.Request) { controllers.CreateVideo(w, r) })
+	r.Delete("/api/video", func(w http.ResponseWriter, r *http.Request) { controllers.DeleteVideo(w, r) })
+
+	r.Get("/api/category", func(w http.ResponseWriter, r *http.Request) { controllers.GetCategory(w, r) })
+	r.Get("/api/categories", func(w http.ResponseWriter, r *http.Request) { controllers.GetAllCategories(w, r) })
+	r.Post("/api/categories", func(w http.ResponseWriter, r *http.Request) { controllers.CreateCategory(w, r) })
+	r.Delete("/api/category", func(w http.ResponseWriter, r *http.Request) { controllers.DeleteCategory(w, r) })
 }

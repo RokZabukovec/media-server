@@ -4,6 +4,7 @@ import (
 	"github.com/charmbracelet/log"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"mediaserver/configuration"
 	"mediaserver/services"
 	"sync"
 	"time"
@@ -14,7 +15,7 @@ var (
 	dbLock sync.Mutex
 )
 
-func GetDatabase(dbName string) *gorm.DB {
+func GetDatabase() *gorm.DB {
 	dbLock.Lock()
 	defer dbLock.Unlock()
 
@@ -24,7 +25,7 @@ func GetDatabase(dbName string) *gorm.DB {
 
 	var err error
 	for i := 0; i < 3; i++ {
-		dbFilepath, _ := services.GetDatabaseFilepath(dbName)
+		dbFilepath, _ := services.GetDatabaseFilepath(configuration.AppName)
 		db, err = gorm.Open(sqlite.Open(dbFilepath), &gorm.Config{})
 		if err == nil {
 			log.Info("Connected to the database 💥", "retry", i)

@@ -9,7 +9,6 @@ import (
 	"mediaserver/configuration"
 	"mediaserver/models/responses"
 	"mediaserver/services"
-	"mediaserver/validation"
 	"net/http"
 	"net/url"
 	"os"
@@ -37,12 +36,12 @@ func GetThumbnail(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	w.Header().Set("Content-Type", "image/jpeg")
-	// Cache for 30 days
 	w.Header().Set("Cache-Control", "max-age=2592000")
 
 	_, err = io.Copy(w, file)
 	if err != nil {
 		http.Error(w, "Error sending thumbnail", http.StatusInternalServerError)
+
 		return
 	}
 }
@@ -125,30 +124,20 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if validation.IsVideo(&file) == false {
-		mimeType, _ := validation.GetFileMimeType(file)
-		responses.NewFileUploadValidationErrorResponse(w, validation.GetAcceptedMIMITypes(), "The file is not in the correct format", &mimeType)
-		file.Close()
-		return
-	}
+	defer file.Close()
 
-	basePath, err := services.GetMediaServerBaseDirectory()
-	if err != nil {
-		http.Error(w, "Failed to get media server directory", http.StatusInternalServerError)
-		file.Close()
-		return
-	}
+	uploadService := services.NewVideoUploadService()
 
-	videoFolder := path.Join(basePath, services.RemoveExtension(handler.Filename))
+	go func() {
+		filename, err := uploadService.UploadVideo(file, handler)
+		if err != nil {
+			log.Error("Error in processing video: ", err)
 
-	segmentError := services.CreateHLSFilesFromAPIRequest(file, videoFolder, handler.Filename)
-	if segmentError != nil {
-		log.Error(segmentError)
-		http.Error(w, "Internal server error while processing the file", http.StatusInternalServerError)
-		file.Close()
-		return
-	}
+			return
+		}
 
-	file.Close()
-	responses.NewFileUploadedResponse(w, "File uploaded successfully", handler.Filename)
+		log.Info("File uploaded successfully: ", "filename", filename)
+	}()
+
+	responses.NewFileUploadedResponse(w, "File upload started successfully", handler.Filename)
 }

@@ -34,13 +34,11 @@ func CreateHLSFilesFromAPIRequest(file multipart.File, outputFolderPath, outputF
 		}
 	}()
 
-	// Copy the content of the uploaded file to the output file
 	if _, err = io.Copy(outputFile, file); err != nil {
 		log.Errorf("Failed to copy uploaded file to output file: %w", err)
 		return err
 	}
 
-	// Create the HLS playlist from the video
 	hlsOutputPath := filepath.Join(outputFolderPath, configuration.PlaylistName)
 	ffmpegCmd := exec.Command(
 		"ffmpeg",

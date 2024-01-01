@@ -16,8 +16,8 @@
 </script>
 
 <template>
-  <router-link :to="{ name: 'movie', params: { name: name, url: playlist }}">
-    <div class="card card-compact max-w-md mx-auto bg-base-100 shadow-xl md:w-96 md:mx-auto">
+  <router-link :to="{ name: 'movie', params: { name: name, url: playlist }}" class="p-0">
+    <div class="card card-compact bg-base-100 shadow-xl">
       <figure>
         <img :src="imgUrl" alt="movie thumbnail" class="aspect-video" />
       </figure>

@@ -8,3 +8,7 @@ type CategoryCreateRequest struct {
 type CategoryGetAllRequest struct {
 	Parent uint `json:"parent"`
 }
+
+type GetCategoryRequest struct {
+	Id uint `json:"Id"`
+}
